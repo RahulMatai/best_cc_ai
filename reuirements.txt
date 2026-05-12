@@ -1,0 +1,9 @@
+requests
+beautifulsoup4
+pandas
+openpyxl
+groq
+python-dotenv
+fastapi
+uvicorn
+pydantic
