@@ -401,7 +401,7 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 # ── Config ───────────────────────────────────────────────────
-API_URL = "http://localhost:8000"
+#API_URL = "http://localhost:8000"
 
 # ── Load cards ───────────────────────────────────────────────
 @st.cache_data
@@ -631,14 +631,7 @@ with tab3:
                 if st.button(q, key=f"sug_{i}", use_container_width=True):
                     st.session_state.chat_history.append({"role": "user", "content": q})
                     with st.spinner(""):
-                        try:
-                            res = requests.post(f"{API_URL}/chat", json={
-                                "question": q,
-                                "cards": st.session_state.selected_cards
-                            }, timeout=15)
-                            answer = ask_groq(q, st.session_state.selected_cards)
-                        except:
-                            answer = "Could not reach the API. Make sure api.py is running."
+                      answer = ask_groq(q, st.session_state.selected_cards)
                     st.session_state.chat_history.append({"role": "ai", "content": answer})
                     st.rerun()
 
