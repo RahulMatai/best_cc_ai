@@ -631,7 +631,10 @@ with tab3:
                 if st.button(q, key=f"sug_{i}", use_container_width=True):
                     st.session_state.chat_history.append({"role": "user", "content": q})
                     with st.spinner(""):
-                      answer = ask_groq(q, st.session_state.selected_cards)
+                        try:
+                            answer = ask_groq(q, st.session_state.selected_cards)
+                        except:
+                            answer = "Could not reach the API. Make sure api.py is running."
                     st.session_state.chat_history.append({"role": "ai", "content": answer})
                     st.rerun()
 
@@ -660,11 +663,7 @@ with tab3:
             st.session_state.chat_history.append({"role": "user", "content": user_input})
             with st.spinner("CardIQ is thinking..."):
                 try:
-                    res = requests.post(f"{API_URL}/chat", json={
-                        "question": user_input,
-                        "cards": st.session_state.selected_cards
-                    }, timeout=15)
-                    answer = res.json().get("answer", "Sorry, something went wrong.")
+                    answer = ask_groq(user_input, st.session_state.selected_cards)
                 except:
                     answer = "Could not reach the API. Make sure api.py is running."
             st.session_state.chat_history.append({"role": "ai", "content": answer})
