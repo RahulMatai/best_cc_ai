@@ -11,7 +11,7 @@ __pycache__/
 *.pyo
 
 # Data outputs
-data/cards.json
+
 
 # VS Code
 .vscode/
