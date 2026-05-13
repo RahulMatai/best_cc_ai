@@ -1,13 +1,38 @@
 import streamlit as st
 import requests
 import json
+import json
+import os
+from groq import Groq
+from dotenv import load_dotenv
 
+load_dotenv()
+client = Groq(api_key=os.getenv("GROQ_API_KEY"))
+
+def ask_groq(question, selected_cards):
+    all_cards = fetch_all_cards()
+    user_cards = [c for c in all_cards if c["card_name"] in selected_cards]
+    context = json.dumps(user_cards, indent=2)
+    prompt = f"""
+You are an Indian credit card expert.
+User has these cards: {context}
+User question: {question}
+Give a specific, actionable answer in 3-4 lines.
+Tell them exactly which card to use and why.
+"""
+    response = client.chat.completions.create(
+        model="llama-3.1-8b-instant",
+        messages=[{"role": "user", "content": prompt}],
+        max_tokens=300
+    )
+    return response.choices[0].message.content.strip()
 st.set_page_config(
     page_title="CardIQ — Smart Credit Card Advisor",
     page_icon="💳",
     layout="wide",
     initial_sidebar_state="collapsed"
 )
+
 
 st.markdown("""
 <style>
@@ -382,8 +407,8 @@ API_URL = "http://localhost:8000"
 @st.cache_data
 def fetch_all_cards():
     try:
-        res = requests.get(f"{API_URL}/cards", timeout=5)
-        return res.json()
+        with open("data/cards.json") as f:
+            return json.load(f)
     except:
         return []
 
@@ -575,7 +600,7 @@ with tab2:
     </div>
 </div>
 """
-st.markdown(html, unsafe_allow_html=True)
+            st.markdown(html, unsafe_allow_html=True)
 
 # ════════════════════════════════════════════════════════════
 # TAB 3 — ASK CARDIQ
@@ -611,7 +636,7 @@ with tab3:
                                 "question": q,
                                 "cards": st.session_state.selected_cards
                             }, timeout=15)
-                            answer = res.json().get("answer", "Sorry, something went wrong.")
+                            answer = ask_groq(q, st.session_state.selected_cards)
                         except:
                             answer = "Could not reach the API. Make sure api.py is running."
                     st.session_state.chat_history.append({"role": "ai", "content": answer})
